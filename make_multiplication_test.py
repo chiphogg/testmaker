@@ -77,20 +77,24 @@ def _generate_problems(args):
 
 
 def _layout_problems(problems, doc, args):
-    sep = None
-    for _ in range(args.num_rows):
-        if sep:
-            doc.append(sep)
-        sep = NoEscape(r'\linebreak')
+    for (problem, layout) in zip(problems, _problem_layoutters(args)):
+        layout(problem, doc)
 
-        for _ in range(args.num_cols):
-            doc.append(
-                    _layout_problem(
-                        problem=next(problems),
-                        relative_width=1.0 / args.num_cols,
-                        relative_height=1.0 / args.num_rows,
+
+def _problem_layoutters(args):
+    for row in range(args.num_rows):
+        for col in range(args.num_cols):
+            def func(p, doc):
+                if row > 0 and col == 0:
+                    doc.append(NoEscape(r'\linebreak'))
+                doc.append(
+                        _layout_problem(
+                            p, 
+                            relative_width=1.0 / args.num_cols,
+                            relative_height=1.0 / args.num_rows,
+                            ),
                         )
-                    )
+            yield func
 
 
 def _publish_document(doc, args):
