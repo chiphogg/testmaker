@@ -79,6 +79,16 @@ def _layout_problems(problems, doc, args):
                     )
 
 
+def _publish_document(doc, args):
+    _ensure_folder_exists(os.path.dirname(args.output_file))
+    doc.generate_pdf(args.output_file)
+    doc.generate_tex(args.output_file)
+
+
+################################################################################
+# Level 2
+
+
 def _layout_problem(problem, relative_width, relative_height):
     top, op, bottom = map(str, problem)
     width = max(len(top), len(bottom)) + 1
@@ -104,22 +114,20 @@ def _layout_problem(problem, relative_width, relative_height):
     return minipage
 
 
+def _ensure_folder_exists(folder):
+    pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
+
+
+################################################################################
+# Level 3
+
+
 def _right_justify(string, width):
     return ' ' * (width - len(string)) + string
 
 
-def _publish_document(doc, args):
-    _ensure_folder_exists(os.path.dirname(args.output_file))
-    doc.generate_pdf(args.output_file)
-    doc.generate_tex(args.output_file)
-
-
 ################################################################################
-# Level 2
-
-
-def _ensure_folder_exists(folder):
-    pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
+# Main logic
 
 
 if __name__ == '__main__':
