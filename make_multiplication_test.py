@@ -15,10 +15,11 @@ def main(argv):
 
     for _ in range(args.num_rows):
         for _ in range(args.num_cols):
-            _generate_problem(
-                    doc=doc,
-                    relative_width=1.0 / args.num_cols,
-                    relative_height=1.0 / args.num_rows,
+            doc.append(
+                    _generate_problem(
+                        relative_width=1.0 / args.num_cols,
+                        relative_height=1.0 / args.num_rows,
+                        )
                     )
         doc.append(NoEscape(r'\linebreak'))
 
@@ -62,23 +63,23 @@ def _create_test_document(num_cols):
     return doc
 
 
-def _generate_problem(doc, relative_width, relative_height):
+def _generate_problem(relative_width, relative_height):
     table_spec = 'c@{}c@{}c@{}c@{}'
-    with doc.create(
-            MiniPage(
-                width=r'{}\textwidth'.format(relative_width),
-                height=r'{}\textheight'.format(relative_height * 0.99),
-                align='c',
-                pos='t',
-                )
-            ) as minipage:
+    minipage = MiniPage(
+            width=r'{}\textwidth'.format(relative_width),
+            height=r'{}\textheight'.format(relative_height * 0.99),
+            align='c',
+            pos='t',
+            )
 
-        with minipage.create(
-                Tabular(table_spec=table_spec),
-                ) as table:
-            table.add_row('', 3, 1, 4)
-            table.add_row(NoEscape(r'$\times$'), '', 5, 7)
-            table.add_hline()
+    with minipage.create(
+            Tabular(table_spec=table_spec),
+            ) as table:
+        table.add_row('', 3, 1, 4)
+        table.add_row(NoEscape(r'$\times$'), '', 5, 7)
+        table.add_hline()
+
+    return minipage
 
 
 def _publish_document(doc, output_file):
