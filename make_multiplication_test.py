@@ -11,7 +11,7 @@ from pylatex import Document, Math, MiniPage, NoEscape, Section, Tabular
 def main(argv):
     args = _parse_command_line_args(argv)
 
-    doc = _create_test_document(num_cols=args.num_cols)
+    doc = _create_test_document(args)
 
     sep = None
     for _ in range(args.num_rows):
@@ -27,7 +27,7 @@ def main(argv):
                         )
                     )
 
-    _publish_document(doc, args.output_file)
+    _publish_document(doc, args)
 
     return 0
 
@@ -57,7 +57,7 @@ def _parse_command_line_args(argv):
     return parser.parse_args()
 
 
-def _create_test_document(num_cols):
+def _create_test_document(args):
     doc = Document(
             indent=False,
             page_numbers=False,
@@ -89,10 +89,10 @@ def _generate_problem(relative_width, relative_height):
     return minipage
 
 
-def _publish_document(doc, output_file):
-    _ensure_folder_exists(os.path.dirname(output_file))
-    doc.generate_pdf(output_file)
-    doc.generate_tex(output_file)
+def _publish_document(doc, args):
+    _ensure_folder_exists(os.path.dirname(args.output_file))
+    doc.generate_pdf(args.output_file)
+    doc.generate_tex(args.output_file)
 
 
 ################################################################################
@@ -101,6 +101,7 @@ def _publish_document(doc, output_file):
 
 def _ensure_folder_exists(folder):
     pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
+
 
 if __name__ == '__main__':
     sys.exit(main(argv=sys.argv))
