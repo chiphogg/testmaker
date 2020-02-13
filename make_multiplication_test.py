@@ -13,7 +13,12 @@ def main(argv):
 
     doc = _create_test_document(num_cols=args.num_cols)
 
+    sep = None
     for _ in range(args.num_rows):
+        if sep:
+            doc.append(sep)
+        sep = NoEscape(r'\linebreak')
+
         for _ in range(args.num_cols):
             doc.append(
                     _generate_problem(
@@ -21,14 +26,15 @@ def main(argv):
                         relative_height=1.0 / args.num_rows,
                         )
                     )
-        doc.append(NoEscape(r'\linebreak'))
 
     _publish_document(doc, args.output_file)
 
     return 0
 
+
 ################################################################################
 # Level 1
+
 
 def _parse_command_line_args(argv):
     parser = argparse.ArgumentParser()
