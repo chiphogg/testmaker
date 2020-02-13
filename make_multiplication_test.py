@@ -5,7 +5,7 @@ import os
 import pathlib
 import sys
 
-from pylatex import Document, Math, MiniPage, NoEscape, Section, Tabular
+from pylatex import Document, MiniPage, NoEscape, Tabular
 
 
 def main(argv):
@@ -13,19 +13,8 @@ def main(argv):
 
     doc = _create_test_document(args)
 
-    sep = None
-    for _ in range(args.num_rows):
-        if sep:
-            doc.append(sep)
-        sep = NoEscape(r'\linebreak')
-
-        for _ in range(args.num_cols):
-            doc.append(
-                    _generate_problem(
-                        relative_width=1.0 / args.num_cols,
-                        relative_height=1.0 / args.num_rows,
-                        )
-                    )
+    problems = _generate_problems(args)
+    _layout_problems(problems, doc, args)
 
     _publish_document(doc, args)
 
@@ -69,8 +58,31 @@ def _create_test_document(args):
     return doc
 
 
-def _generate_problem(relative_width, relative_height):
-    table_spec = 'c@{}c@{}c@{}c@{}'
+def _generate_problems(args):
+    return ((314, r'\times', 57) for _ in range(args.num_rows * args.num_cols))
+
+
+def _layout_problems(problems, doc, args):
+    sep = None
+    for _ in range(args.num_rows):
+        if sep:
+            doc.append(sep)
+        sep = NoEscape(r'\linebreak')
+
+        for _ in range(args.num_cols):
+            doc.append(
+                    _layout_problem(
+                        problem=next(problems),
+                        relative_width=1.0 / args.num_cols,
+                        relative_height=1.0 / args.num_rows,
+                        )
+                    )
+
+
+def _layout_problem(problem, relative_width, relative_height):
+    top, op, bottom = map(str, problem)
+    width = max(len(top), len(bottom)) + 1
+
     minipage = MiniPage(
             width=r'{}\textwidth'.format(relative_width),
             height=r'{}\textheight'.format(relative_height * 0.99),
@@ -80,13 +92,20 @@ def _generate_problem(relative_width, relative_height):
 
     minipage.append(NoEscape(r'\LARGE'))
     with minipage.create(
-            Tabular(table_spec=table_spec),
+            Tabular(table_spec='c@{}' * width),
             ) as table:
-        table.add_row('', 3, 1, 4)
-        table.add_row(NoEscape(r'$\times$'), '', 5, 7)
+        table.add_row(*tuple(_right_justify(top, width)))
+        table.add_row(
+                NoEscape(r'${}$'.format(op)),
+                *tuple(_right_justify(bottom, (width - 1))),
+                )
         table.add_hline()
 
     return minipage
+
+
+def _right_justify(string, width):
+    return ' ' * (width - len(string)) + string
 
 
 def _publish_document(doc, args):
