@@ -3,6 +3,7 @@
 import argparse
 import os
 import pathlib
+import random
 import sys
 
 from pylatex import Document, MiniPage, NoEscape, Tabular
@@ -59,7 +60,14 @@ def _create_test_document(args):
 
 
 def _generate_problems(args):
-    return ((314, r'\times', 57) for _ in range(args.num_rows * args.num_cols))
+    return (
+            (
+                random.randint(101, 999),
+                r'\times',
+                random.randint(11, 99),
+                )
+            for _ in range(args.num_rows * args.num_cols)
+            )
 
 
 def _layout_problems(problems, doc, args):
