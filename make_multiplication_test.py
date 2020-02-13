@@ -40,7 +40,7 @@ def _parse_command_line_args(argv):
 
     parser.add_argument(
             '--num-rows',
-            default=8,
+            default=6,
             )
 
     parser.add_argument(
@@ -72,6 +72,7 @@ def _generate_problem(relative_width, relative_height):
             pos='t',
             )
 
+    minipage.append(NoEscape(r'\LARGE'))
     with minipage.create(
             Tabular(table_spec=table_spec),
             ) as table:
