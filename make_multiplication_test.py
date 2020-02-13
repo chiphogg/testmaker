@@ -31,17 +31,22 @@ def _parse_command_line_args(argv):
 
     parser.add_argument(
             '--num-cols',
-            default=5,
+            default=4,
             )
 
     parser.add_argument(
             '--num-rows',
-            default=6,
+            default=5,
             )
 
     parser.add_argument(
             '--output-file',
             default='output/test',
+            )
+
+    parser.add_argument(
+            '--seed',
+            default=1,
             )
 
     return parser.parse_args()
@@ -60,6 +65,7 @@ def _create_test_document(args):
 
 
 def _generate_problems(args):
+    random.seed(args.seed)
     return (
             (
                 random.randint(101, 999),
