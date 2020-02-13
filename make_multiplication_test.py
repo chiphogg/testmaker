@@ -77,8 +77,28 @@ def _generate_problems(args):
 
 
 def _layout_problems(problems, doc, args):
+    problem_page = _make_full_page_minipage()
+    solution_page = _make_full_page_minipage()
+
     for (problem, layout) in zip(problems, _problem_layoutters(args)):
-        layout(problem, doc)
+        layout(problem, problem_page)
+        layout(_solution(problem), solution_page)
+
+    doc.append(problem_page)
+    doc.append(NoEscape(r'\linebreak'))
+    doc.append(solution_page)
+
+
+def _solution(problem):
+    top, op, bottom = problem
+    return (top, op, bottom, top * bottom)
+
+
+def _make_full_page_minipage():
+    return MiniPage(
+            width=r'\textwidth',
+            height=r'\textheight',
+            )
 
 
 def _problem_layoutters(args):
@@ -108,8 +128,9 @@ def _publish_document(doc, args):
 
 
 def _layout_problem(problem, relative_width, relative_height):
-    top, op, bottom = map(str, problem)
-    width = max(len(top), len(bottom)) + 1
+    top, op, bottom, *solution = map(str, problem)
+    op_column = max(len(top), len(bottom)) + 1
+    width = max([op_column, *map(len, solution)])
 
     minipage = MiniPage(
             width=r'{}\textwidth'.format(relative_width),
@@ -124,10 +145,13 @@ def _layout_problem(problem, relative_width, relative_height):
             ) as table:
         table.add_row(*tuple(_right_justify(top, width)))
         table.add_row(
+                *([''] * (width - op_column)),
                 NoEscape(r'${}$'.format(op)),
-                *tuple(_right_justify(bottom, (width - 1))),
+                *tuple(_right_justify(bottom, (op_column - 1))),
                 )
         table.add_hline()
+        if solution:
+            table.add_row(*tuple(_right_justify(*solution, width)))
 
     return minipage
 
