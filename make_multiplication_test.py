@@ -81,8 +81,10 @@ def _layout_problems(problems, doc, args):
     solution_page = _make_full_page_minipage()
 
     for (problem, layout) in zip(problems, _problem_layoutters(args)):
-        layout(problem, problem_page)
-        layout(_solution(problem), solution_page)
+        solution = _solution(problem)
+        width = len(str(solution[-1]))
+        layout(problem, problem_page, num_chars=width)
+        layout(solution, solution_page, num_chars=width)
 
     doc.append(problem_page)
     doc.append(NoEscape(r'\linebreak'))
@@ -104,7 +106,7 @@ def _make_full_page_minipage():
 def _problem_layoutters(args):
     for row in range(args.num_rows):
         for col in range(args.num_cols):
-            def func(p, doc):
+            def func(p, doc, num_chars):
                 if row > 0 and col == 0:
                     doc.append(NoEscape(r'\linebreak'))
                 doc.append(
@@ -112,6 +114,7 @@ def _problem_layoutters(args):
                             p, 
                             relative_width=1.0 / args.num_cols,
                             relative_height=1.0 / args.num_rows,
+                            num_chars=num_chars,
                             ),
                         )
             yield func
@@ -127,10 +130,9 @@ def _publish_document(doc, args):
 # Level 2
 
 
-def _layout_problem(problem, relative_width, relative_height):
+def _layout_problem(problem, relative_width, relative_height, num_chars):
     top, op, bottom, *solution = map(str, problem)
     op_column = max(len(top), len(bottom)) + 1
-    width = max([op_column, *map(len, solution)])
 
     minipage = MiniPage(
             width=r'{}\textwidth'.format(relative_width),
@@ -141,17 +143,17 @@ def _layout_problem(problem, relative_width, relative_height):
 
     minipage.append(NoEscape(r'\LARGE'))
     with minipage.create(
-            Tabular(table_spec='c@{}' * width),
+            Tabular(table_spec=r'p{1pt}' * num_chars),
             ) as table:
-        table.add_row(*tuple(_right_justify(top, width)))
+        table.add_row(*tuple(_right_justify(top, num_chars)))
         table.add_row(
-                *([''] * (width - op_column)),
+                *([''] * (num_chars - op_column)),
                 NoEscape(r'${}$'.format(op)),
                 *tuple(_right_justify(bottom, (op_column - 1))),
                 )
         table.add_hline()
         if solution:
-            table.add_row(*tuple(_right_justify(*solution, width)))
+            table.add_row(*tuple(_right_justify(*solution, num_chars)))
 
     return minipage
 
