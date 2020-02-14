@@ -6,7 +6,7 @@ import pathlib
 import random
 import sys
 
-from pylatex import Document, MiniPage, NoEscape, Tabular
+from pylatex import Command, Document, MiniPage, NoEscape, Tabular
 
 
 def main(argv):
@@ -56,10 +56,12 @@ def _create_test_document(args):
     doc = Document(
             indent=False,
             page_numbers=False,
+            textcomp=False,
             geometry_options={
                 'margin': NoEscape(r'0.5in'),
                 },
             )
+    doc.preamble.append(Command('usepackage', 'kpfonts'))
 
     return doc
 
