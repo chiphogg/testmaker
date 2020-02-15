@@ -31,11 +31,13 @@ def _parse_command_line_args(argv):
 
     parser.add_argument(
             '--num-cols',
+            type=int,
             default=4,
             )
 
     parser.add_argument(
             '--num-rows',
+            type=int,
             default=5,
             )
 
@@ -47,6 +49,7 @@ def _parse_command_line_args(argv):
     parser.add_argument(
             '--seed',
             default=1,
+            type=int,
             )
 
     return parser.parse_args()
