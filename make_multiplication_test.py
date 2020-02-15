@@ -96,9 +96,14 @@ def _layout_problems(problems, doc, args):
     doc.append(solution_page)
 
 
-def _solution(problem):
-    top, op, bottom = problem
-    return (top, op, bottom, top * bottom)
+def _publish_document(doc, args):
+    _ensure_folder_exists(os.path.dirname(args.output_file))
+    doc.generate_pdf(args.output_file)
+    doc.generate_tex(args.output_file)
+
+
+################################################################################
+# Level 2
 
 
 def _make_full_page_minipage():
@@ -125,14 +130,17 @@ def _problem_layoutters(args):
             yield func
 
 
-def _publish_document(doc, args):
-    _ensure_folder_exists(os.path.dirname(args.output_file))
-    doc.generate_pdf(args.output_file)
-    doc.generate_tex(args.output_file)
+def _solution(problem):
+    top, op, bottom = problem
+    return (top, op, bottom, top * bottom)
+
+
+def _ensure_folder_exists(folder):
+    pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
 
 
 ################################################################################
-# Level 2
+# Level 3
 
 
 def _layout_problem(problem, relative_width, relative_height, num_chars):
@@ -163,12 +171,8 @@ def _layout_problem(problem, relative_width, relative_height, num_chars):
     return minipage
 
 
-def _ensure_folder_exists(folder):
-    pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
-
-
 ################################################################################
-# Level 3
+# Level 4
 
 
 def _right_justify(string, width):
