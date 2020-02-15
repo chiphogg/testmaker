@@ -30,41 +30,32 @@ def _parse_command_line_args(argv):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-            '--num-cols',
-            type=int,
-            default=4,
-            )
+        "--num-cols", type=int, default=4,
+    )
 
     parser.add_argument(
-            '--num-rows',
-            type=int,
-            default=5,
-            )
+        "--num-rows", type=int, default=5,
+    )
 
     parser.add_argument(
-            '--output-file',
-            default='output/test',
-            )
+        "--output-file", default="output/test",
+    )
 
     parser.add_argument(
-            '--seed',
-            default=1,
-            type=int,
-            )
+        "--seed", default=1, type=int,
+    )
 
     return parser.parse_args()
 
 
 def _create_test_document(args):
     doc = Document(
-            indent=False,
-            page_numbers=False,
-            textcomp=False,
-            geometry_options={
-                'margin': NoEscape(r'0.5in'),
-                },
-            )
-    doc.preamble.append(Command('usepackage', 'kpfonts'))
+        indent=False,
+        page_numbers=False,
+        textcomp=False,
+        geometry_options={"margin": NoEscape(r"0.5in"),},
+    )
+    doc.preamble.append(Command("usepackage", "kpfonts"))
 
     return doc
 
@@ -72,13 +63,9 @@ def _create_test_document(args):
 def _generate_problems(args):
     random.seed(args.seed)
     return (
-            (
-                random.randint(101, 999),
-                r'\times',
-                random.randint(11, 99),
-                )
-            for _ in range(args.num_rows * args.num_cols)
-            )
+        (random.randint(101, 999), r"\times", random.randint(11, 99))
+        for _ in range(args.num_rows * args.num_cols)
+    )
 
 
 def _layout_problems(problems, doc, args):
@@ -92,7 +79,7 @@ def _layout_problems(problems, doc, args):
         layout(solution, solution_page, num_chars=width)
 
     doc.append(problem_page)
-    doc.append(NoEscape(r'\linebreak'))
+    doc.append(NoEscape(r"\linebreak"))
     doc.append(solution_page)
 
 
@@ -107,26 +94,25 @@ def _publish_document(doc, args):
 
 
 def _make_full_page_minipage():
-    return MiniPage(
-            width=r'\textwidth',
-            height=r'\textheight',
-            )
+    return MiniPage(width=r"\textwidth", height=r"\textheight")
 
 
 def _problem_layoutters(args):
     for row in range(args.num_rows):
         for col in range(args.num_cols):
+
             def func(p, doc, num_chars):
                 if row > 0 and col == 0:
-                    doc.append(NoEscape(r'\linebreak'))
+                    doc.append(NoEscape(r"\linebreak"))
                 doc.append(
-                        _layout_problem(
-                            p, 
-                            relative_width=1.0 / args.num_cols,
-                            relative_height=1.0 / args.num_rows,
-                            num_chars=num_chars,
-                            ),
-                        )
+                    _layout_problem(
+                        p,
+                        relative_width=1.0 / args.num_cols,
+                        relative_height=1.0 / args.num_rows,
+                        num_chars=num_chars,
+                    ),
+                )
+
             yield func
 
 
@@ -148,22 +134,20 @@ def _layout_problem(problem, relative_width, relative_height, num_chars):
     op_column = max(len(top), len(bottom)) + 1
 
     minipage = MiniPage(
-            width=r'{}\textwidth'.format(relative_width),
-            height=r'{}\textheight'.format(relative_height * 0.99),
-            align='c',
-            pos='t',
-            )
+        width=r"{}\textwidth".format(relative_width),
+        height=r"{}\textheight".format(relative_height * 0.99),
+        align="c",
+        pos="t",
+    )
 
-    minipage.append(NoEscape(r'\LARGE'))
-    with minipage.create(
-            Tabular(table_spec=r'p{1pt}' * num_chars),
-            ) as table:
+    minipage.append(NoEscape(r"\LARGE"))
+    with minipage.create(Tabular(table_spec=r"p{1pt}" * num_chars)) as table:
         table.add_row(*tuple(_right_justify(top, num_chars)))
         table.add_row(
-                *([''] * (num_chars - op_column)),
-                NoEscape(r'${}$'.format(op)),
-                *tuple(_right_justify(bottom, (op_column - 1))),
-                )
+            *([""] * (num_chars - op_column)),
+            NoEscape(r"${}$".format(op)),
+            *tuple(_right_justify(bottom, (op_column - 1))),
+        )
         table.add_hline()
         if solution:
             table.add_row(*tuple(_right_justify(*solution, num_chars)))
@@ -176,12 +160,12 @@ def _layout_problem(problem, relative_width, relative_height, num_chars):
 
 
 def _right_justify(string, width):
-    return ' ' * (width - len(string)) + string
+    return " " * (width - len(string)) + string
 
 
 ################################################################################
 # Main logic
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(argv=sys.argv))
