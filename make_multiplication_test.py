@@ -45,6 +45,14 @@ def _parse_command_line_args(argv):
         "--seed", default=1, type=int,
     )
 
+    parser.add_argument(
+        "--first-digits", default=3, type=int,
+    )
+
+    parser.add_argument(
+        "--second-digits", default=2, type=int,
+    )
+
     return parser.parse_args()
 
 
@@ -63,7 +71,11 @@ def _create_test_document(args):
 def _generate_problems(args):
     random.seed(args.seed)
     return (
-        (random.randint(101, 999), r"\times", random.randint(11, 99))
+        (
+            _random_int(num_digits=args.first_digits),
+            r"\times",
+            _random_int(num_digits=args.second_digits),
+        )
         for _ in range(args.num_rows * args.num_cols)
     )
 
@@ -74,9 +86,8 @@ def _layout_problems(problems, doc, args):
 
     for (problem, layout) in zip(problems, _problem_layoutters(args)):
         solution = _solution(problem)
-        width = len(str(solution[-1]))
-        layout(problem, problem_page, num_chars=width)
-        layout(solution, solution_page, num_chars=width)
+        layout(problem, problem_page)
+        layout(solution, solution_page)
 
     doc.append(problem_page)
     doc.append(NoEscape(r"\linebreak"))
@@ -93,6 +104,10 @@ def _publish_document(doc, args):
 # Level 2
 
 
+def _random_int(num_digits):
+    return random.randint(int("1" + ("0" * (num_digits - 1))), int("9" * num_digits))
+
+
 def _make_full_page_minipage():
     return MiniPage(width=r"\textwidth", height=r"\textheight")
 
@@ -101,7 +116,7 @@ def _problem_layoutters(args):
     for row in range(args.num_rows):
         for col in range(args.num_cols):
 
-            def func(p, doc, num_chars):
+            def func(p, doc):
                 if row > 0 and col == 0:
                     doc.append(NoEscape(r"\linebreak"))
                 doc.append(
@@ -109,7 +124,6 @@ def _problem_layoutters(args):
                         p,
                         relative_width=1.0 / args.num_cols,
                         relative_height=1.0 / args.num_rows,
-                        num_chars=num_chars,
                     ),
                 )
 
@@ -129,9 +143,10 @@ def _ensure_folder_exists(folder):
 # Level 3
 
 
-def _layout_problem(problem, relative_width, relative_height, num_chars):
+def _layout_problem(problem, relative_width, relative_height):
     top, op, bottom, *solution = map(str, problem)
     op_column = max(len(top), len(bottom)) + 1
+    num_chars = max(op_column, len(str(int(top) * int(bottom))))
 
     minipage = MiniPage(
         width=r"{}\textwidth".format(relative_width),
