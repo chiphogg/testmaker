@@ -53,6 +53,8 @@ def _parse_command_line_args(argv):
         "--second-digits", default=2, type=int,
     )
 
+    parser.add_argument("--override-max", type=int)
+
     return parser.parse_args()
 
 
@@ -72,9 +74,9 @@ def _generate_problems(args):
     random.seed(args.seed)
     return (
         (
-            _random_int(num_digits=args.first_digits),
+            _random_int(num_digits=args.first_digits, override_max=args.override_max),
             r"\times",
-            _random_int(num_digits=args.second_digits),
+            _random_int(num_digits=args.second_digits, override_max=args.override_max),
         )
         for _ in range(args.num_rows * args.num_cols)
     )
@@ -104,8 +106,13 @@ def _publish_document(doc, args):
 # Level 2
 
 
-def _random_int(num_digits):
-    return random.randint(int("1" + ("0" * (num_digits - 1))), int("9" * num_digits))
+def _random_int(num_digits, override_max):
+    bounds = (
+        (1, override_max)
+        if override_max
+        else (int("1" + ("0" * (num_digits - 1))), int("9" * num_digits))
+    )
+    return random.randint(*bounds)
 
 
 def _make_full_page_minipage():
