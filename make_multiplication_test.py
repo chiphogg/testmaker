@@ -8,6 +8,8 @@ import sys
 
 from pylatex import Command, Document, MiniPage, NoEscape, Tabular
 
+from multiplication_problem import MultiplicationProblemFactory
+
 
 def main(argv):
     args = _parse_command_line_args(argv)
@@ -72,14 +74,8 @@ def _create_test_document(args):
 
 def _generate_problems(args):
     random.seed(args.seed)
-    return (
-        (
-            _random_int(num_digits=args.first_digits, override_max=args.override_max),
-            r"\times",
-            _random_int(num_digits=args.second_digits, override_max=args.override_max),
-        )
-        for _ in range(args.num_rows * args.num_cols)
-    )
+    factory = MultiplicationProblemFactory(args=args)
+    return (factory.generate_problem() for _ in range(args.num_rows * args.num_cols))
 
 
 def _layout_problems(problems, doc, args):
@@ -87,9 +83,8 @@ def _layout_problems(problems, doc, args):
     solution_page = _make_full_page_minipage()
 
     for (problem, layout) in zip(problems, _problem_layoutters(args)):
-        solution = _solution(problem)
-        layout(problem, problem_page)
-        layout(solution, solution_page)
+        layout(problem.get_problem(), problem_page)
+        layout(problem.get_solution(), solution_page)
 
     doc.append(problem_page)
     doc.append(NoEscape(r"\linebreak"))
@@ -104,15 +99,6 @@ def _publish_document(doc, args):
 
 ################################################################################
 # Level 2
-
-
-def _random_int(num_digits, override_max):
-    bounds = (
-        (1, override_max)
-        if override_max
-        else (int("1" + ("0" * (num_digits - 1))), int("9" * num_digits))
-    )
-    return random.randint(*bounds)
 
 
 def _make_full_page_minipage():
@@ -135,11 +121,6 @@ def _problem_layoutters(args):
                 )
 
             yield func
-
-
-def _solution(problem):
-    top, op, bottom = problem
-    return (top, op, bottom, top * bottom)
 
 
 def _ensure_folder_exists(folder):
