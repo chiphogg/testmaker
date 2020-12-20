@@ -20,17 +20,18 @@ class ProblemFactory:
         self.operation = args.operation
 
     def generate_problem(self):
-        if self.operation == "*":
+        op = random.choice("*+-") if self.operation == "?" else self.operation
+        if op == "*":
             return MultiplicationProblem(
                 first_num=self.generate_first_num(),
                 second_num=self.generate_second_num(),
             )
-        elif self.operation == "+":
+        elif op == "+":
             return AdditionProblem(
                 first_num=self.generate_first_num(),
                 second_num=self.generate_second_num(),
             )
-        elif self.operation == "-":
+        elif op == "-":
             return SubtractionProblem(
                 first_num=self.generate_first_num(),
                 second_num=self.generate_second_num(),
