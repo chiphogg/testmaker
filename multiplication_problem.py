@@ -1,5 +1,7 @@
 import random
 
+from pylatex import NoEscape, Tabular
+
 
 class MultiplicationProblemFactory:
     """A factory for multiplication problems.
@@ -40,12 +42,33 @@ class MultiplicationProblem:
         self.first_num = first_num
         self.second_num = second_num
 
-    def get_problem(self):
-        """Return a tuple with the first multiplicand, the symbol for the operation, and
-        the second multiplicand."""
-        return (self.first_num, r"\times", self.second_num)
-
-    def get_solution(self):
+    def _problem_tuple(self):
         """Return a tuple with the first multiplicand, the symbol for the operation, the
         second multiplicand, and the solution."""
-        return self.get_problem() + (self.first_num * self.second_num,)
+        return (
+            self.first_num,
+            r"\times",
+            self.second_num,
+            self.first_num * self.second_num,
+        )
+
+    def render_problem(self, minipage, show_solution=False):
+        top, op, bottom, *solution = map(str, self._problem_tuple())
+        op_column = max(len(top), len(bottom)) + 1
+        num_chars = max(op_column, len(str(int(top) * int(bottom))))
+
+        minipage.append(NoEscape(r"\LARGE"))
+        with minipage.create(Tabular(table_spec=r"p{1pt}" * num_chars)) as table:
+            table.add_row(*tuple(_right_justify(top, num_chars)))
+            table.add_row(
+                *([""] * (num_chars - op_column)),
+                NoEscape(fr"${op}$"),
+                *tuple(_right_justify(bottom, (op_column - 1))),
+            )
+            table.add_hline()
+            if show_solution:
+                table.add_row(*tuple(_right_justify(*solution, num_chars)))
+
+
+def _right_justify(string, width):
+    return " " * (width - len(string)) + string

@@ -84,8 +84,8 @@ def _layout_problems(problems, doc, args):
     solution_page = Page(num_rows=args.num_rows, num_cols=args.num_cols)
 
     for problem in problems:
-        _layout_problem(problem.get_problem(), problem_page.next_minipage())
-        _layout_problem(problem.get_solution(), solution_page.next_minipage())
+        problem.render_problem(problem_page.next_minipage(), show_solution=False)
+        problem.render_problem(solution_page.next_minipage(), show_solution=True)
 
     doc.append(problem_page.page)
     doc.append(NoEscape(r"\linebreak"))
@@ -104,36 +104,6 @@ def _publish_document(doc, args):
 
 def _ensure_folder_exists(folder):
     pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
-
-
-################################################################################
-# Level 3
-
-
-def _layout_problem(problem, minipage):
-    top, op, bottom, *solution = map(str, problem)
-    op_column = max(len(top), len(bottom)) + 1
-    num_chars = max(op_column, len(str(int(top) * int(bottom))))
-
-    minipage.append(NoEscape(r"\LARGE"))
-    with minipage.create(Tabular(table_spec=r"p{1pt}" * num_chars)) as table:
-        table.add_row(*tuple(_right_justify(top, num_chars)))
-        table.add_row(
-            *([""] * (num_chars - op_column)),
-            NoEscape(fr"${op}$"),
-            *tuple(_right_justify(bottom, (op_column - 1))),
-        )
-        table.add_hline()
-        if solution:
-            table.add_row(*tuple(_right_justify(*solution, num_chars)))
-
-
-################################################################################
-# Level 4
-
-
-def _right_justify(string, width):
-    return " " * (width - len(string)) + string
 
 
 ################################################################################
