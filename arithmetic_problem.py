@@ -3,8 +3,8 @@ import random
 from pylatex import NoEscape, Tabular
 
 
-class MultiplicationProblemFactory:
-    """A factory for multiplication problems.
+class ProblemFactory:
+    """A factory for arithmetic problems.
 
     Like any problem factory, the contract is:
         - We accept parsed command line arguments for configuration.

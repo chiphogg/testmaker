@@ -8,7 +8,7 @@ import sys
 
 from pylatex import Command, Document, MiniPage, NoEscape, Tabular
 
-from multiplication_problem import MultiplicationProblemFactory
+from arithmetic_problem import ProblemFactory
 from page import Page
 
 
@@ -75,7 +75,7 @@ def _create_test_document(args):
 
 def _generate_problems(args):
     random.seed(args.seed)
-    factory = MultiplicationProblemFactory(args=args)
+    factory = ProblemFactory(args=args)
     return (factory.generate_problem() for _ in range(args.num_rows * args.num_cols))
 
 
