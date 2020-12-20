@@ -1,3 +1,4 @@
+import abc
 import random
 
 from pylatex import NoEscape, Tabular
@@ -16,11 +17,19 @@ class ProblemFactory:
         self.first_digits = args.first_digits
         self.second_digits = args.second_digits
         self.override_max = args.override_max
+        self.operation = args.operation
 
     def generate_problem(self):
-        return MultiplicationProblem(
-            first_num=self.generate_first_num(), second_num=self.generate_second_num()
-        )
+        if self.operation == "*":
+            return MultiplicationProblem(
+                first_num=self.generate_first_num(),
+                second_num=self.generate_second_num(),
+            )
+        elif self.operation == "+":
+            return AdditionProblem(
+                first_num=self.generate_first_num(),
+                second_num=self.generate_second_num(),
+            )
 
     def generate_first_num(self):
         return self._generate_num(num_digits=self.first_digits)
@@ -37,20 +46,23 @@ class ProblemFactory:
         return random.randint(*bounds)
 
 
-class MultiplicationProblem:
+class ArithmeticProblem(metaclass=abc.ABCMeta):
     def __init__(self, first_num, second_num):
         self.first_num = first_num
         self.second_num = second_num
 
+    @abc.abstractmethod
+    def operation(self):
+        pass
+
+    @abc.abstractmethod
+    def solution(self):
+        pass
+
     def _problem_tuple(self):
         """Return a tuple with the first multiplicand, the symbol for the operation, the
         second multiplicand, and the solution."""
-        return (
-            self.first_num,
-            r"\times",
-            self.second_num,
-            self.first_num * self.second_num,
-        )
+        return (self.first_num, self.operation(), self.second_num, self.solution())
 
     def render_problem(self, minipage, show_solution=False):
         top, op, bottom, *solution = map(str, self._problem_tuple())
@@ -68,6 +80,28 @@ class MultiplicationProblem:
             table.add_hline()
             if show_solution:
                 table.add_row(*tuple(_right_justify(*solution, num_chars)))
+
+
+class MultiplicationProblem(ArithmeticProblem):
+    def __init__(self, first_num, second_num):
+        super().__init__(first_num, second_num)
+
+    def operation(self):
+        return r"\times"
+
+    def solution(self):
+        return self.first_num * self.second_num
+
+
+class AdditionProblem(ArithmeticProblem):
+    def __init__(self, first_num, second_num):
+        super().__init__(first_num, second_num)
+
+    def operation(self):
+        return "+"
+
+    def solution(self):
+        return self.first_num + self.second_num
 
 
 def _right_justify(string, width):

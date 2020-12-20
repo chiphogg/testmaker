@@ -58,6 +58,8 @@ def _parse_command_line_args(argv):
 
     parser.add_argument("--override-max", type=int)
 
+    parser.add_argument("--operation", choices=list("*+"), default="*")
+
     return parser.parse_args()
 
 
