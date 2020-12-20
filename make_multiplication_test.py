@@ -137,8 +137,8 @@ def _layout_problem(problem, relative_width, relative_height):
     num_chars = max(op_column, len(str(int(top) * int(bottom))))
 
     minipage = MiniPage(
-        width=r"{}\textwidth".format(relative_width),
-        height=r"{}\textheight".format(relative_height * 0.99),
+        width=fr"{relative_width}\textwidth",
+        height=fr"{relative_height * 0.99}\textheight",
         align="c",
         pos="t",
     )
@@ -148,7 +148,7 @@ def _layout_problem(problem, relative_width, relative_height):
         table.add_row(*tuple(_right_justify(top, num_chars)))
         table.add_row(
             *([""] * (num_chars - op_column)),
-            NoEscape(r"${}$".format(op)),
+            NoEscape(fr"${op}$"),
             *tuple(_right_justify(bottom, (op_column - 1))),
         )
         table.add_hline()
