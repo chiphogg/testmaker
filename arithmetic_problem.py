@@ -30,6 +30,11 @@ class ProblemFactory:
                 first_num=self.generate_first_num(),
                 second_num=self.generate_second_num(),
             )
+        elif self.operation == "-":
+            return SubtractionProblem(
+                first_num=self.generate_first_num(),
+                second_num=self.generate_second_num(),
+            )
 
     def generate_first_num(self):
         return self._generate_num(num_digits=self.first_digits)
@@ -102,6 +107,17 @@ class AdditionProblem(ArithmeticProblem):
 
     def solution(self):
         return self.first_num + self.second_num
+
+
+class SubtractionProblem(ArithmeticProblem):
+    def __init__(self, first_num, second_num):
+        super().__init__(first_num + second_num, second_num)
+
+    def operation(self):
+        return "-"
+
+    def solution(self):
+        return self.first_num - self.second_num
 
 
 def _right_justify(string, width):
