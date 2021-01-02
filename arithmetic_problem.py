@@ -17,25 +17,17 @@ class ProblemFactory:
         self.first_digits = args.first_digits
         self.second_digits = args.second_digits
         self.override_max = args.override_max
-        self.operation = args.operation
+        self.generators = _problem_generators(op=args.operation)
 
     def generate_problem(self):
-        op = random.choice("*+-") if self.operation == "?" else self.operation
-        if op == "*":
-            return MultiplicationProblem(
-                first_num=self.generate_first_num(),
-                second_num=self.generate_second_num(),
-            )
-        elif op == "+":
-            return AdditionProblem(
-                first_num=self.generate_first_num(),
-                second_num=self.generate_second_num(),
-            )
-        elif op == "-":
-            return SubtractionProblem(
-                first_num=self.generate_first_num(),
-                second_num=self.generate_second_num(),
-            )
+        ProblemGenerator = (
+            random.choice(self.generators)
+            if len(self.generators) > 1
+            else self.generators[0]
+        )
+        return ProblemGenerator(
+            first_num=self.generate_first_num(), second_num=self.generate_second_num(),
+        )
 
     def generate_first_num(self):
         return self._generate_num(num_digits=self.first_digits)
@@ -50,6 +42,21 @@ class ProblemFactory:
             else (int("1" + ("0" * (num_digits - 1))), int("9" * num_digits))
         )
         return random.randint(*bounds)
+
+
+def _problem_generators(op):
+    """Return the appropriate generator classes for the requested operation.
+
+    :param op:  One of `*`, `+`, `-`, or `?` (for random).
+    """
+    ops = []
+    if op in "*?":
+        ops.append(MultiplicationProblem)
+    if op in "+?":
+        ops.append(AdditionProblem)
+    if op in "-?":
+        ops.append(SubtractionProblem)
+    return tuple(ops)
 
 
 class ArithmeticProblem(metaclass=abc.ABCMeta):
